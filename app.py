@@ -1,5 +1,7 @@
+# app.py
 import streamlit as st
-from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
 import re
 
 st.set_page_config(page_title="YouTube Full Content Extractor", page_icon="📝", layout="centered")
@@ -30,19 +32,27 @@ if st.button("Extract Full Text", type="primary"):
         else:
             with st.spinner("Fetching full video content..."):
                 try:
-                    transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-                    full_text = " ".join([item['text'] for item in transcript_list])
+                    # Updated syntax using YouTubeTranscriptApi instance and fetch()
+                    ytt_api = YouTubeTranscriptApi()
+                    transcript_list = ytt_api.fetch(video_id)
+                    
+                    # Extract text from the new object structure
+                    full_text = " ".join([item.text for item in transcript_list])
+                    
                     st.success("Content extracted successfully!")
                     st.text_area("Full Content (Text Format)", full_text, height=350)
+                    
                     st.download_button(
                         label="Download Full Text as .txt",
                         data=full_text,
                         file_name=f"youtube_content_{video_id}.txt",
                         mime="text/plain"
                     )
+                    
                 except TranscriptsDisabled:
                     st.error("Subtitles and transcripts are disabled for this video.")
                 except NoTranscriptFound:
                     st.error("No transcripts were found for this video.")
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
+                    
