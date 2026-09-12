@@ -46,4 +46,3 @@ if st.button("Extract Full Text", type="primary"):
                     st.error("No transcripts were found for this video.")
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
-                  
